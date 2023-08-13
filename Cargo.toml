@@ -1,2 +1,8 @@
 [workspace]
 members = [ "tegra_swizzle", "nutexb_swizzle" ]
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

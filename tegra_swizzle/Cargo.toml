@@ -10,7 +10,7 @@ readme = "../README.md"
 edition = "2018"
 
 [lib]
-crate-type = ["rlib", "cdylib"]
+crate-type = ["rlib", "cdylib", "staticlib"]
 
 [dependencies]
 arbitrary = { version = "1", features = ["derive"], optional = true }
@@ -21,6 +21,10 @@ criterion = "0.3"
 
 [features]
 ffi = []
+
+[unstable]
+build-std = ["core", "compiler_builtins", "alloc"]
+build-std-features = ["compiler-builtins-mem"]
 
 [package.metadata.docs.rs]
 all-features = true

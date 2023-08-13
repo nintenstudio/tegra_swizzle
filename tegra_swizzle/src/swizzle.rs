@@ -4,6 +4,8 @@ use crate::{
     SwizzleError, GOB_HEIGHT_IN_BYTES, GOB_SIZE_IN_BYTES, GOB_WIDTH_IN_BYTES,
 };
 
+use alloc::vec::Vec;
+
 /// Swizzles the bytes from `source` using the block linear swizzling algorithm.
 ///
 /// Returns [SwizzleError::NotEnoughData] if `source` does not have

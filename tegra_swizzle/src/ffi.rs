@@ -33,8 +33,8 @@ pub unsafe extern "C" fn swizzle_surface(
     mipmap_count: usize,
     array_count: usize,
 ) {
-    let source = std::slice::from_raw_parts(source, source_len);
-    let mut destination = std::slice::from_raw_parts_mut(destination, destination_len);
+    let source = core::slice::from_raw_parts(source, source_len);
+    let mut destination = core::slice::from_raw_parts_mut(destination, destination_len);
 
     crate::surface::swizzle_surface_inner::<false>(
         width,
@@ -75,8 +75,8 @@ pub unsafe extern "C" fn deswizzle_surface(
     mipmap_count: usize,
     array_count: usize,
 ) {
-    let source = std::slice::from_raw_parts(source, source_len);
-    let mut destination = std::slice::from_raw_parts_mut(destination, destination_len);
+    let source = core::slice::from_raw_parts(source, source_len);
+    let mut destination = core::slice::from_raw_parts_mut(destination, destination_len);
 
     crate::surface::swizzle_surface_inner::<true>(
         width,
@@ -165,8 +165,8 @@ pub unsafe extern "C" fn swizzle_block_linear(
     block_height: usize,
     bytes_per_pixel: usize,
 ) {
-    let source = std::slice::from_raw_parts(source, source_len);
-    let destination = std::slice::from_raw_parts_mut(destination, destination_len);
+    let source = core::slice::from_raw_parts(source, source_len);
+    let destination = core::slice::from_raw_parts_mut(destination, destination_len);
 
     crate::swizzle::swizzle_inner::<false>(
         width,
@@ -199,8 +199,8 @@ pub unsafe extern "C" fn deswizzle_block_linear(
     block_height: usize,
     bytes_per_pixel: usize,
 ) {
-    let source = std::slice::from_raw_parts(source, source_len);
-    let destination = std::slice::from_raw_parts_mut(destination, destination_len);
+    let source = core::slice::from_raw_parts(source, source_len);
+    let destination = core::slice::from_raw_parts_mut(destination, destination_len);
 
     crate::swizzle::swizzle_inner::<true>(
         width,

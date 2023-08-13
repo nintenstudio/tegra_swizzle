@@ -62,6 +62,69 @@ let surface = deswizzle_surface(
 //!
 //! Groups of 512 bytes form GOBs ("group of bytes") where each GOB is 64x8 bytes.
 //! The `block_height` parameter determines how many GOBs stack vertically to form a block.
+#![no_std]
+#![no_main]
+#![feature(error_in_core)]
+
+
+#[macro_use]
+extern crate alloc;
+
+use core::alloc::{GlobalAlloc, Layout};
+use core::ffi::c_void;
+use core::{cmp, ptr};
+
+extern "C" {
+    pub fn malloc(size: usize) -> *mut u8;
+    pub fn free(p: *mut c_void);
+}
+
+pub struct Alloc;
+unsafe impl GlobalAlloc for Alloc {
+    #[inline]
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        malloc(
+            layout.size(),
+        ) as *mut u8
+    }
+
+    #[inline]
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        // Unfortunately, calloc doesn't make any alignment guarantees, so the memory
+        // has to be manually zeroed-out.
+        let ptr = self.alloc(layout);
+        if !ptr.is_null() {
+            ptr::write_bytes(ptr, 0, layout.size());
+        }
+        ptr
+    }
+
+    #[inline]
+    unsafe fn dealloc(&self, ptr: *mut u8, _layout: Layout) {
+        free(ptr as *mut c_void);
+    }
+
+    #[inline]
+    unsafe fn realloc(&self, old_ptr: *mut u8, old_layout: Layout, new_size: usize) -> *mut u8 {
+        let new_layout = Layout::from_size_align_unchecked(new_size, old_layout.align());
+        let new_ptr = self.alloc(new_layout);
+        if !new_ptr.is_null() {
+            let size = cmp::min(old_layout.size(), new_size);
+            ptr::copy_nonoverlapping(old_ptr, new_ptr, size);
+            self.dealloc(old_ptr, old_layout);
+        }
+        new_ptr
+    }
+}
+
+#[global_allocator]
+static ALLOCATOR: Alloc = Alloc;
+
+#[panic_handler]
+fn panic(_info: &core::panic::PanicInfo) -> ! {
+    loop {}
+}
+
 mod arrays;
 mod blockdepth;
 mod blockheight;
@@ -108,8 +171,8 @@ pub enum SwizzleError {
     },
 }
 
-impl std::fmt::Display for SwizzleError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for SwizzleError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             SwizzleError::NotEnoughData {
                 expected_size,
@@ -123,7 +186,7 @@ impl std::fmt::Display for SwizzleError {
     }
 }
 
-impl std::error::Error for SwizzleError {}
+impl core::error::Error for SwizzleError {}
 
 impl BlockHeight {
     /// Attempts to construct a block height from `value`.
